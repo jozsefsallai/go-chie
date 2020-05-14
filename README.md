@@ -42,7 +42,7 @@ func main() {
 `go get`:
 
 ```sh
-go get github.com/jozsefsallai/go-chie
+go get github.com/jozsefsallai/go-chie/cmd/chie
 ```
 
 _*) if you do this, you might want to download it somewhere inside your PATH_
