@@ -57,7 +57,7 @@ chie tsc decrypt Ballo1.tsc -o Ballo1.txt
 # will decrypt to Ballo1.txt
 
 chie tsc encrypt Ballo1.txt
-# will encrypt to Ballo1.tsc
+# will encrypt to output.tsc
 
 chie tsc encrypt Ballo1.txt -o Ballo1.tsc
 # will encrypt to Ballo1.tsc
