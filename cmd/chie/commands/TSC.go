@@ -3,6 +3,8 @@ package commands
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
+	"strings"
 
 	"github.com/jozsefsallai/go-chie"
 	"github.com/urfave/cli"
@@ -16,25 +18,46 @@ func handle(action string, ctx *cli.Context) error {
 	from := ctx.Args().Get(0)
 	to := ctx.String("output")
 
-	tsc := chie.NewTSCParser()
-
-	err := tsc.FromFile(from)
+	matches, err := filepath.Glob(from)
 	if err != nil {
 		return err
 	}
 
-	if action == "decrypt" {
-		tsc.Decrypt()
-	} else if action == "encrypt" {
-		tsc.Encrypt()
+	if len(matches) == 0 {
+		return errors.New("no files match the pattern that was provided")
 	}
 
-	err = tsc.ToFile(to)
-	if err != nil {
-		return err
+	for _, match := range matches {
+		tsc := chie.NewTSCParser()
+
+		if action == "decrypt" {
+			fmt.Printf("Decrypting \"%s\"...\n", match)
+		} else {
+			fmt.Printf("Encrypting \"%s\"...\n", match)
+		}
+
+		basename := filepath.Base(match)
+		output := strings.Replace(to, "*", strings.TrimSuffix(basename, filepath.Ext(basename)), 1)
+
+		err = tsc.FromFile(match)
+		if err != nil {
+			return err
+		}
+
+		if action == "decrypt" {
+			tsc.Decrypt()
+		} else if action == "encrypt" {
+			tsc.Encrypt()
+		}
+
+		err = tsc.ToFile(output)
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("Done: %s\n", output)
 	}
 
-	fmt.Println("Done!")
 	return nil
 }
 
@@ -54,7 +77,6 @@ var TSCCommand = cli.Command{
 				},
 			},
 			Action: func(ctx *cli.Context) error {
-				fmt.Println("Decrypting...")
 				return handle("decrypt", ctx)
 			},
 		},
@@ -69,7 +91,6 @@ var TSCCommand = cli.Command{
 				},
 			},
 			Action: func(ctx *cli.Context) error {
-				fmt.Println("Encrypting...")
 				return handle("encrypt", ctx)
 			},
 		},

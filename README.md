@@ -63,6 +63,14 @@ chie tsc encrypt Ballo1.txt -o Ballo1.tsc
 # will encrypt to Ballo1.tsc
 ```
 
+or decrypt/encrypt multiple files at once:
+
+```sh
+chie tsc decrypt "Stage/*.tsc" -o "Stage/*.txt"
+# will decrypt all files with the extension ".tsc" in the Stage folder
+# the quotes are necessary
+```
+
 ## License
 
 MIT.
