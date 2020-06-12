@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io/ioutil"
 	"os"
+	"regexp"
 
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
@@ -22,9 +23,10 @@ const (
 // TSC is a struct that defines a TSC input. It contains the contents of the
 // input, the size of the input, and the output string.
 type TSC struct {
-	contents []byte
-	size     int
-	output   string
+	contents      []byte
+	size          int
+	output        string
+	allowComments bool
 }
 
 func (tsc *TSC) convert(conversionFactor int) *TSC {
@@ -57,6 +59,11 @@ func (tsc *TSC) getEncodingChar() byte {
 	return tsc.contents[tsc.size/2]
 }
 
+func (tsc *TSC) stripComments(input []byte) []byte {
+	pattern := regexp.MustCompile(`( |\r?\n)?\/\/.*`)
+	return pattern.ReplaceAll(input, nil)
+}
+
 // Decrypt will decrypt a string from encrypted TSC to human-readable format
 func (tsc *TSC) Decrypt() *TSC {
 	return tsc.convert(Decryption)
@@ -71,6 +78,11 @@ func (tsc *TSC) Encrypt() *TSC {
 // inside of a given string
 func (tsc *TSC) FromString(input string) {
 	tsc.contents = []byte(input)
+
+	if !tsc.allowComments {
+		tsc.contents = tsc.stripComments(tsc.contents)
+	}
+
 	tsc.size = len(tsc.contents)
 }
 
@@ -84,6 +96,10 @@ func (tsc *TSC) FromFile(path string) error {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
+	}
+
+	if !tsc.allowComments {
+		data = tsc.stripComments(data)
 	}
 
 	tsc.contents = data
@@ -117,6 +133,13 @@ func (tsc *TSC) ToFile(path string) error {
 	}
 
 	return nil
+}
+
+// AllowComments will ensure that the comments will remain intact in the
+// encrypted TSC file. If this method is not called, the TSC parser will
+// remove all comments, since the base engine doesn't support them.
+func (tsc *TSC) AllowComments() {
+	tsc.allowComments = true
 }
 
 // NewTSCParser will return a new empty TSC struct

@@ -15,7 +15,7 @@ func main() {
 		Commands: []cli.Command{
 			commands.TSCCommand,
 		},
-		Version: "1.0.1",
+		Version: "1.0.2",
 	}
 
 	err := app.Run(os.Args)

@@ -10,7 +10,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-func handle(action string, ctx *cli.Context) error {
+func handle(action string, ctx *cli.Context, allowComments bool) error {
 	if ctx.NArg() != 1 {
 		return errors.New("too few or too many arguments provided to the command")
 	}
@@ -29,6 +29,10 @@ func handle(action string, ctx *cli.Context) error {
 
 	for _, match := range matches {
 		tsc := chie.NewTSCParser()
+
+		if allowComments {
+			tsc.AllowComments()
+		}
 
 		if action == "decrypt" {
 			fmt.Printf("Decrypting \"%s\"...\n", match)
@@ -77,7 +81,7 @@ var TSCCommand = cli.Command{
 				},
 			},
 			Action: func(ctx *cli.Context) error {
-				return handle("decrypt", ctx)
+				return handle("decrypt", ctx, false)
 			},
 		},
 		{
@@ -89,9 +93,13 @@ var TSCCommand = cli.Command{
 					Value: "output.tsc",
 					Usage: "`PATH` to output file",
 				},
+				cli.BoolFlag{
+					Name:  "allow-comments, c",
+					Usage: "if this flag is provided, the comments will not be stripped",
+				},
 			},
 			Action: func(ctx *cli.Context) error {
-				return handle("encrypt", ctx)
+				return handle("encrypt", ctx, ctx.Bool("allow-comments"))
 			},
 		},
 	},

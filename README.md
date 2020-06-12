@@ -71,6 +71,14 @@ chie tsc decrypt "Stage/*.tsc" -o "Stage/*.txt"
 # the quotes are necessary
 ```
 
+Encrypt while preserving comments:
+
+```sh
+chie tsc encrypt Ballo1.tsc -o Ballo1.txt --allow-comments
+# or
+chie tsc encrypt Ballo1.tsc -o Ballo1.txt -c
+```
+
 ## License
 
 MIT.
